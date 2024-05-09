@@ -190,33 +190,34 @@ SELECT
 FROM tb_emp
 WHERE addr LIKE '%강남%'
 ;
-SELECT
-    dept_cd,
+SELECT 
+    dept_cd, 
     dept_nm
-FROM tb_dept
-WHERE dept_cd IN(
-            SELECT
-                dept_cd,
-                emp_nm,
-                addr
-            FROM tb_emp
-            WHERE addr LIKE '%강남%'
-)
-;
-SELECT
-    dept_cd,
-    dept_nm
-FROM tb_dept D
-WHERE EXISTS(
-            SELECT
-                D.dept_cd
-            FROM tb_emp E
-            WHERE addr LIKE '%강남%'
-            AND D.dept_cd = E.dept_cd
-)
+FROM tb_dept 
+WHERE dept_cd IN (
+                    SELECT dept_cd
+                    FROM tb_emp 
+                    WHERE addr LIKE '%강남%'
+                )
 ;
 
+SELECT 
+    1 
+FROM tb_emp
+WHERE addr LIKE '%강남%'
+;
 
+SELECT A.dept_cd, A.dept_nm
+FROM tb_dept A
+WHERE EXISTS (
+                    SELECT 
+                        1
+                    FROM tb_emp B
+                    WHERE addr LIKE '%강남%'
+                        AND A.dept_cd = B.dept_cd
+                )
+ORDER BY 1            
+;
 
 
 SELECT
@@ -269,9 +270,7 @@ ORDER BY A.emp_no
 ;
 
 
---인라인 뷰 서브쿼리
---FROM절에 쓰느 서브쿼리 
-
+-- 인라인 뷰 서브쿼리 (FROM절에 쓰는 서브쿼리)
 --각 사번의 사번과 이름과 평균 급여 정보를 알고 싶음
 SELECT
     E.emp_no,
@@ -284,39 +283,46 @@ ON E.emp_no = S.emp_no
 GROUP BY E.emp_no, E.emp_nm
 ORDER BY E.emp_no
 ;
-----★★★★★코드 오류뜸 확인바람 ★★★★★★
-SELECT
-    E.emp_no,
-    E.emp_nm,
-    AVG(S.pay_amt)
-FROM tb_emp E
--- tb_sal_his자리를 서브쿼리로 한다
-JOIN (
-    SELECT 
-        emp_no,
-        AVG(pay_amt) AS pay_avg
-    FROM tb_sal_his
-    GROUP BY emp_no
-) S
-ON E.emp_no = S.emp_no
-ORDER BY E.emp_no
+
+-- 각 사원의 사번과 이름과 평균 급여정보를 조회하고 싶다.
+SELECT 
+    A.emp_no, A.emp_nm, B.pay_avg
+FROM tb_emp A JOIN (
+                 SELECT 
+                    emp_no, AVG(pay_amt) AS pay_avg
+                 FROM tb_sal_his
+                 GROUP BY emp_no
+                    ) B
+ON A.emp_no = B.emp_no
+ORDER BY A.emp_no
 ;
 
-----★★★★★코드 오류뜸 확인바람 ★★★★★★
+SELECT 
+    A.emp_no, A.emp_nm, AVG(B.PAY_AMT)
+FROM tb_emp A 
+JOIN TB_SAL_HIS B
+ON A.emp_no = B.emp_no
+GROUP BY A.EMP_NO, A.EMP_NM 
+ORDER BY A.emp_no
+;
+
+
 -- 스칼라 서브쿼리 (SELECT, INSERT, UPDATE절에 쓰는 서브쿼리)
 
 -- 사원의 사번, 사원명, 부서명, 생년월일, 성별코드를 조회
-SELECT
-    E.emp_no,
-    E.emp_nm,
-    (SELECT )
-    E.birth_de
-    E.sex_cd
-FROM tb_emp E, tb_dept D
-WHERE E.dept_cd = D.dept_cd
+SELECT 
+    A.emp_no
+    , A.emp_nm
+    , (SELECT B.dept_nm FROM tb_dept B WHERE A.dept_cd = B.dept_cd) AS dept_nm
+    , A.birth_de
+    , A.sex_cd
+FROM tb_emp A
+;
 
 
-
+SELECT 
+    emp_nm, null
+FROM tb_emp;
 
 
 
